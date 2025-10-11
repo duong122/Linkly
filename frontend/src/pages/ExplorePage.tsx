@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import ExploreGrid from '@/components/explore/ExploreGrid';
+import MainLayout from '../components/layout/MainLayout';
+import ExploreGrid from '../components/explore/ExploreGrid';
 
 export default function ExplorePage() {
   useEffect(() => {

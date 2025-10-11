@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, CompassIcon, MessageCircleIcon, BellIcon, BookmarkIcon, UserIcon, SettingsIcon, PlusSquareIcon, MenuIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { cn } from '../../lib/utils';
+import { Button } from '../../components/ui/button';
 
 const navItems = [
   { icon: HomeIcon, label: 'Home', path: '/' },

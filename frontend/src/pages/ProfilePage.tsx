@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfilePosts from '@/components/profile/ProfilePosts';
+import MainLayout from '../components/layout/MainLayout';
+import ProfileHeader from '../components/profile/ProfileHeader';
+import ProfilePosts from '../components/profile/ProfilePosts';
 
 export default function ProfilePage() {
   useEffect(() => {

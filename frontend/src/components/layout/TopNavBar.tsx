@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SearchIcon, UploadIcon, BellIcon, MessageCircleIcon, UserIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import SearchCommand from '@/components/search/SearchCommand';
-import { useModalStore } from '@/stores/modalStore';
+} from '../../components/ui/dropdown-menu';
+import SearchCommand from '../../components/search/SearchCommand';
+import { useModalStore } from '../../stores/modalStore';
 
 export default function TopNavBar() {
   const [searchOpen, setSearchOpen] = useState(false);

@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card } from '../../components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { HeartIcon, MessageCircleIcon, UserPlusIcon } from 'lucide-react';
 
 const notifications = [

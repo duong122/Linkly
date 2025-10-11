@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import MessagesList from '@/components/messages/MessagesList';
+import MainLayout from '../components/layout/MainLayout';
+import MessagesList from '../components/messages/MessagesList';
 
 export default function MessagesPage() {
   useEffect(() => {
