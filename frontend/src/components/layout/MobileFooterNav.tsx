@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, CompassIcon, PlusSquareIcon, HeartIcon, UserIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 
 const navItems = [
   { icon: HomeIcon, label: 'Home', path: '/' },

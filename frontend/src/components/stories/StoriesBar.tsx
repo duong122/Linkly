@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
+import { ScrollArea } from '../../components/ui/scroll-area';
 
 const stories = [
   { id: '1', username: 'your_story', avatar: '', isYourStory: true },

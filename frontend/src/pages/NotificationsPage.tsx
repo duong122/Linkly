@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import NotificationsList from '@/components/notifications/NotificationsList';
+import MainLayout from '../components/layout/MainLayout';
+import NotificationsList from '../components/notifications/NotificationsList';
 
 export default function NotificationsPage() {
   useEffect(() => {

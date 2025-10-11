@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { Card } from '../../components/ui/card';
 
 const savedPosts = [
   { id: '1', image: 'https://c.animaapp.com/mgj6ccb4wKAw2A/img/ai_3.png', alt: 'digital communication concept' },

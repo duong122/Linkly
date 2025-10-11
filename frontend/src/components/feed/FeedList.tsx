@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useFeedStore } from '@/stores/feedStore';
+import { useFeedStore } from '../../stores/feedStore';
 import FeedItem from './FeedItem';
 import gsap from 'gsap';
 

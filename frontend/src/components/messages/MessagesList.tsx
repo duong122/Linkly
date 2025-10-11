@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card } from '../../components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 
 const messages = [
   { id: '1', name: 'Alice Johnson', lastMessage: 'Hey! How are you?', time: '2m ago', unread: true },

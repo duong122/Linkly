@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
+import { Button } from '../../components/ui/button';
 
 const suggestedUsers = [
   { id: '1', name: 'alice_johnson', subtitle: 'Followed by user1 + 2 more', avatar: '' },
