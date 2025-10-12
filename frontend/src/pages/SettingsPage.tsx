@@ -10,8 +10,7 @@ export default function SettingsPage() {
   return (
     <MainLayout>
       <div className="w-full max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-foreground mb
-        -8">Settings</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">Settings</h1>
         <SettingsForm />
       </div>
     </MainLayout>

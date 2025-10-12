@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import MainLayout from '../components/layout/MainLayout';
 import SavedPosts from '../components/saved/SavedPosts';
+import MainLayout from '../components/layout/MainLayout';
 
 export default function SavedPage() {
   useEffect(() => {

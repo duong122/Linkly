@@ -1,5 +1,5 @@
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../../components/ui/command';
-import { Dialog, DialogContent } from '../../components/ui/dialog';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { Dialog, DialogContent } from '../ui/dialog';
 import { SearchIcon } from 'lucide-react';
 
 interface SearchCommandProps {

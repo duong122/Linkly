@@ -1,4 +1,4 @@
-import { Card } from '../../components/ui/card';
+import { Card } from '../ui/card';
 
 const posts = [
   { id: '1', image: 'https://c.animaapp.com/mgj6ccb4wKAw2A/img/ai_1.png', alt: 'people sharing moments' },

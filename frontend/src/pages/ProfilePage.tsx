@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+
 import MainLayout from '../components/layout/MainLayout';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfilePosts from '../components/profile/ProfilePosts';
