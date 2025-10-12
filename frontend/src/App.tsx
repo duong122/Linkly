@@ -7,6 +7,8 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SavedPage from './pages/SavedPage';
 import SettingsPage from './pages/SettingsPage';
+import Login from './pages/Login';
+
 
 function App() {
   return (
@@ -14,6 +16,7 @@ function App() {
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/messages" element={<MessagesPage />} />
