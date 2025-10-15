@@ -1,6 +1,35 @@
-export const LoginInputs = () => {
+import  React from "react";
+import  { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface LoginFormData {
+  username: string;
+  password: string;
+}
+
+export const LoginInputs: React.FC = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<LoginFormData>({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+
+    // 👉 Thực hiện logic đăng nhập (validate, gọi API...)
+    // Giả sử đăng nhập thành công:
+    navigate("/home"); // hoặc navigate("/") nếu home là trang chính
+  };
+
   return (
-    <form className="caret-transparent flex flex-col">
+    <form className="caret-transparent flex flex-col" onSubmit={handleSubmit}>
       <div className="relative items-stretch box-border caret-transparent flex flex-col shrink-0 justify-start mt-6">
         <div className="caret-transparent mb-1.5 mx-10">
           <div className="relative items-center bg-zinc-50 box-border caret-transparent flex w-full border border-zinc-300 rounded-[3px] border-solid">
@@ -11,7 +40,8 @@ export const LoginInputs = () => {
               <input
                 aria-label="Phone number, username, or email"
                 type="text"
-                value=""
+                value={formData.username}
+                onChange={handleChange}
                 name="username"
                 className="text-base bg-zinc-50 caret-transparent block grow shrink-0 text-left text-ellipsis pl-2 pr-0 pt-[9px] pb-[7px]"
               />
@@ -21,18 +51,19 @@ export const LoginInputs = () => {
         </div>
         <div className="caret-transparent mb-1.5 mx-10">
           <div className="relative items-center bg-zinc-50 box-border caret-transparent flex w-full border border-zinc-300 rounded-[3px] border-solid">
-            <label className="relative caret-transparent flex basis-0 grow shrink-0 h-9">
-              <span className="absolute text-neutral-500 text-xs caret-transparent block h-9 leading-9 text-ellipsis text-nowrap origin-[0%_50%] overflow-hidden left-2 right-0">
-                Password
-              </span>
+            <div className="relative flex basis-0 grow shrink-0 h-9">
               <input
                 aria-label="Password"
                 type="password"
-                value=""
+                value={formData.password}
+                onChange={handleChange}
                 name="password"
-                className="text-base bg-zinc-50 caret-transparent block grow shrink-0 text-left text-ellipsis pl-2 pr-0 pt-[9px] pb-[7px]"
+                className="text-base bg-zinc-50 block grow shrink-0 text-left text-ellipsis pl-2 pr-0 pt-[9px] pb-[7px]"
               />
-            </label>
+              <span className="absolute text-neutral-500 text-xs caret-transparent block h-9 leading-9 text-ellipsis text-nowrap origin-[0%_50%] overflow-hidden left-2 right-0">
+                Password
+              </span>
+            </div>
             <div className="relative items-center box-border caret-transparent flex shrink-0 h-full align-middle pr-2"></div>
           </div>
         </div>
