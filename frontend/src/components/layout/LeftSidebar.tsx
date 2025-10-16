@@ -4,7 +4,7 @@ import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 
 const navItems = [
-  { icon: HomeIcon, label: 'Home', path: '/' },
+  { icon: HomeIcon, label: 'Home', path: '/home' },
   { icon: CompassIcon, label: 'Explore', path: '/explore' },
   { icon: MessageCircleIcon, label: 'Messages', path: '/messages' },
   { icon: BellIcon, label: 'Notifications', path: '/notifications' },

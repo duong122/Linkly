@@ -40,7 +40,7 @@ export default function RightSidebar() {
             <span>·</span>
             <a href="#" className="hover:underline">Terms</a>
           </div>
-          <p>© 2024 INSTAGRAM FROM META</p>
+          <p>© 2025 LINKLY FROM ICEBEAR</p>
         </div>
       </div>
     </aside>
