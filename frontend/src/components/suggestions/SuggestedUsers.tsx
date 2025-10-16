@@ -1,15 +1,125 @@
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 
-const suggestedUsers = [
-  { id: '1', name: 'alice_johnson', subtitle: 'Followed by user1 + 2 more', avatar: '' },
-  { id: '2', name: 'bob_williams', subtitle: 'Followed by user2 + 3 more', avatar: '' },
-  { id: '3', name: 'carol_davis', subtitle: 'New to Instagram', avatar: '' },
-  { id: '4', name: 'david_miller', subtitle: 'Followed by user3 + 1 more', avatar: '' },
-  { id: '5', name: 'emma_wilson', subtitle: 'Followed by user4', avatar: '' },
-];
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  isFollowing: boolean;
+  createdAt: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function SuggestedUsers() {
+  const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSuggestedUsers = async () => {
+      try {
+        setLoading(true);
+        
+        const token = localStorage.getItem('authToken');
+        
+        const response = await fetch(`${API_BASE_URL}/api/users/search?keyword=&page=0&size=20`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+        
+        const data: User[] = await response.json();
+        
+        // Lấy ngẫu nhiên 5 users từ kết quả
+        const shuffled = data.sort(() => 0.5 - Math.random());
+        const randomUsers = shuffled.slice(0, 5);
+        
+        setSuggestedUsers(randomUsers);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching suggested users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuggestedUsers();
+  }, []);
+
+  const handleFollow = async (userId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const user = suggestedUsers.find(u => u.id === userId);
+      
+      if (!user) return;
+      
+      const endpoint = user.isFollowing 
+        ? `${API_BASE_URL}/api/users/${userId}/unfollow`
+        : `${API_BASE_URL}/api/users/${userId}/follow`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to follow/unfollow user');
+      }
+      
+      // Cập nhật trạng thái isFollowing trong state
+      setSuggestedUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === userId ? { ...user, isFollowing: !user.isFollowing } : user
+        )
+      );
+    } catch (err) {
+      console.error('Error following/unfollowing user:', err);
+    }
+  };
+
+  const getSubtitle = (user: User) => {
+    if (user.followersCount === 0) {
+      return 'New to Instagram';
+    } else if (user.followersCount === 1) {
+      return `Followed by ${user.followersCount} user`;
+    } else {
+      return `Followed by ${user.followersCount} users`;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-sm text-neutral-500">
+        Loading suggestions...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-sm text-red-500">
+        Failed to load suggestions
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -24,18 +134,23 @@ export default function SuggestedUsers() {
           <div key={user.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="w-11 h-11">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="bg-gradient-2 text-white text-sm">
-                  {user.name.charAt(0).toUpperCase()}
+                <AvatarImage src={user.avatarUrl || ''} alt={user.username} />
+                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-sm">
+                  {user.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold text-sm text-foreground">{user.name}</p>
-                <p className="text-xs text-neutral-500">{user.subtitle}</p>
+                <p className="font-semibold text-sm text-foreground">{user.username}</p>
+                <p className="text-xs text-neutral-500">{getSubtitle(user)}</p>
               </div>
             </div>
-            <Button size="sm" variant="ghost" className="text-xs font-semibold text-blue-500 hover:text-blue-600 hover:bg-transparent p-0 h-auto">
-              Follow
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-xs font-semibold text-blue-500 hover:text-blue-600 hover:bg-transparent p-0 h-auto"
+              onClick={() => handleFollow(user.id)}
+            >
+              {user.isFollowing ? 'Following' : 'Follow'}
             </Button>
           </div>
         ))}

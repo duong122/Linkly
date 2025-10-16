@@ -37,12 +37,8 @@ export default function ProfileHeader() {
             const response = await fetch(API_URL, {
             method: "GET",
             headers: {
-              "Authorization" : `Bearer ${localStorage.getItem('authToken')}` // Thêm token vào header
+              "Authorization" : `Bearer ${localStorage.getItem('authToken')}` 
             },
-            // body: JSON.stringify({
-            //   username: localStorage.getItem('username'),
-            //   password: localStorage.getItem('password')
-            // })
           });
           
         console.log("Fetch profile response: ", response);
