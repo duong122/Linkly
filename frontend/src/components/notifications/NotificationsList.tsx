@@ -6,7 +6,7 @@ const notifications = [
   {
     id: '1',
     type: 'like',
-    user: 'Alice Johnson',
+    user: 'hong_dang_',
     action: 'liked your post',
     time: '5m ago',
     icon: HeartIcon,
@@ -14,7 +14,7 @@ const notifications = [
   {
     id: '2',
     type: 'comment',
-    user: 'Bob Williams',
+    user: 'minh_tuan',
     action: 'commented on your post',
     time: '1h ago',
     icon: MessageCircleIcon,
@@ -22,7 +22,7 @@ const notifications = [
   {
     id: '3',
     type: 'follow',
-    user: 'Carol Davis',
+    user: 'thanhthao',
     action: 'started following you',
     time: '3h ago',
     icon: UserPlusIcon,

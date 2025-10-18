@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 
+
 interface User {
   id: number;
   username: string;
@@ -16,7 +17,7 @@ interface User {
   createdAt: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 export default function SuggestedUsers() {
   const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
@@ -62,17 +63,18 @@ export default function SuggestedUsers() {
 
   const handleFollow = async (userId: number) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken'); // Sửa lại từ 'token' thành 'authToken'
       const user = suggestedUsers.find(u => u.id === userId);
       
       if (!user) return;
       
-      const endpoint = user.isFollowing 
-        ? `${API_BASE_URL}/api/users/${userId}/unfollow`
-        : `${API_BASE_URL}/api/users/${userId}/follow`;
+      // API follow và unfollow đều dùng endpoint /follow
+      // Nhưng follow dùng POST, unfollow dùng DELETE
+      const endpoint = `${API_BASE_URL}/api/users/${userId}/follow`;
+      const method = user.isFollowing ? 'DELETE' : 'POST';
       
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: method,
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -83,14 +85,27 @@ export default function SuggestedUsers() {
         throw new Error('Failed to follow/unfollow user');
       }
       
-      // Cập nhật trạng thái isFollowing trong state
-      setSuggestedUsers(prevUsers =>
-        prevUsers.map(user =>
-          user.id === userId ? { ...user, isFollowing: !user.isFollowing } : user
-        )
-      );
+      const result = await response.json();
+      
+      if (result.success) {
+        // Cập nhật trạng thái isFollowing trong state
+        setSuggestedUsers(prevUsers =>
+          prevUsers.map(user =>
+            user.id === userId 
+              ? { 
+                  ...user, 
+                  isFollowing: !user.isFollowing,
+                  followersCount: user.isFollowing 
+                    ? user.followersCount - 1 
+                    : user.followersCount + 1
+                } 
+              : user
+          )
+        );
+      }
     } catch (err) {
       console.error('Error following/unfollowing user:', err);
+      alert('Failed to follow/unfollow user. Please try again.');
     }
   };
 
