@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
-import MessagesList from '../components/messages/MessagesList';
+import Messages from '../components/messages/index';
 
 export default function MessagesPage() {
   useEffect(() => {
@@ -11,7 +11,7 @@ export default function MessagesPage() {
     <MainLayout>
       <div className="w-full max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-foreground mb-8">Messages</h1>
-        <MessagesList />
+        <Messages />
       </div>
     </MainLayout>
   );

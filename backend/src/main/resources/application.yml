@@ -41,7 +41,7 @@ server:
 # JWT Configuration
 app:
   jwt:
-    secret: mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLongForHS256Algorithm
+    secret: fOtjkUZJiiq/FL5+k8qG/pdp8a1RzR40ggfN1JLxhTxrmYp9YJgpDUFyNXi21SVIkWsn57bG30RuIJE6BvBpLw
     expiration: 86400000  # 24 hours in milliseconds
 
 # Logging

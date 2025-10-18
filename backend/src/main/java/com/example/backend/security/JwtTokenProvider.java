@@ -1,15 +1,21 @@
 package com.example.backend.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import lombok.extern.slf4j.Slf4j; 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@Slf4j 
 public class JwtTokenProvider {
     
     @Value("${app.jwt.secret:mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLongForHS256Algorithm}")
@@ -18,9 +24,6 @@ public class JwtTokenProvider {
     @Value("${app.jwt.expiration:86400000}") // 24 hours in milliseconds
     private long jwtExpirationInMs;
     
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
-    }
     
     public String generateToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
@@ -36,65 +39,63 @@ public class JwtTokenProvider {
                 .compact();
     }
     
-    public Long getUserIdFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
         
-        return Long.parseLong(claims.getSubject());
-    }
-    
-    public boolean validateToken(String authToken) {
+    public Long getUserIdFromToken(String token) {
         try {
-            // DEBUG LOGS
-            System.out.println("\n========== VALIDATING JWT TOKEN ==========");
-            System.out.println("Token (first 30 chars): [" + authToken.substring(0, Math.min(30, authToken.length())) + "...]");
-            System.out.println("Token length: " + authToken.length());
-            System.out.println("Secret key length: " + jwtSecret.length() + " bytes");
+            Claims claims = Jwts.parser()  // ⭐ 0.12.x: parser() (KHÔNG phải parserBuilder)
+                    .verifyWith(getSigningKey())  // ⭐ 0.12.x: verifyWith() thay vì setSigningKey()
+                    .build()
+                    .parseSignedClaims(token)  // ⭐ 0.12.x: parseSignedClaims() thay vì parseClaimsJws()
+                    .getPayload();  // ⭐ 0.12.x: getPayload() thay vì getBody()
             
-            Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(authToken);
-            
-            System.out.println("✅ Token validation SUCCESS");
-            System.out.println("==========================================\n");
-            return true;
-            
-        } catch (io.jsonwebtoken.security.SignatureException ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: Invalid JWT signature");
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("Possible causes:");
-            System.err.println("  1. Token was generated with different secret key");
-            System.err.println("  2. Token was tampered with");
-            System.err.println("  3. Secret key changed after token generation");
-            System.err.println("==========================================\n");
-        } catch (MalformedJwtException ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: Invalid JWT token format");
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("==========================================\n");
-        } catch (ExpiredJwtException ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: Expired JWT token");
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("Expired at: " + ex.getClaims().getExpiration());
-            System.err.println("==========================================\n");
-        } catch (UnsupportedJwtException ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: Unsupported JWT token");
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("==========================================\n");
-        } catch (IllegalArgumentException ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: JWT claims string is empty");
-            System.err.println("Error: " + ex.getMessage());
-            System.err.println("==========================================\n");
-        } catch (Exception ex) {
-            System.err.println("\n❌ JWT VALIDATION FAILED: Unknown error");
-            System.err.println("Error type: " + ex.getClass().getName());
-            System.err.println("Error: " + ex.getMessage());
-            ex.printStackTrace();
-            System.err.println("==========================================\n");
+            return Long.parseLong(claims.getSubject());
+        } catch (Exception e) {
+            log.error("Failed to extract user ID from token", e);
+            throw new RuntimeException("Invalid token");
         }
-        return false;
+    }
+
+    /**
+     * Validate JWT token
+     */
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSigningKey())  // ⭐ verifyWith() thay vì setSigningKey()
+                    .build()
+                    .parseSignedClaims(token);  // ⭐ parseSignedClaims() thay vì parseClaimsJws()
+            return true;
+        } catch (JwtException ex) {  // ⭐ Catch tổng quát JwtException
+            log.error("Invalid JWT token: {}", ex.getMessage());
+            return false;
+        } catch (IllegalArgumentException ex) {
+            log.error("JWT claims string is empty");
+            return false;
+        }
+    }
+
+    /**
+     * Get signing key from secret
+     */
+    private SecretKey getSigningKey() {  // ⭐ Return type: SecretKey (không phải Key)
+        // Option 1: Nếu secret là Base64
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            // Option 2: Nếu secret là plain text
+            log.warn("JWT secret is not Base64, using plain text");
+            byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            
+            // ⭐ Đảm bảo key đủ dài (tối thiểu 256 bits cho HS256, 512 bits cho HS512)
+            if (keyBytes.length < 64) {  // 512 bits = 64 bytes
+                log.warn("JWT secret is too short, padding to 64 bytes");
+                byte[] paddedKey = new byte[64];
+                System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 64));
+                return Keys.hmacShaKeyFor(paddedKey);
+            }
+            
+            return Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 }

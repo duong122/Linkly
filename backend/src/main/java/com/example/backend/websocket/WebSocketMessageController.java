@@ -62,23 +62,31 @@ public class WebSocketMessageController {
 
             log.info("Message saved to database with ID: {}", messageResponse.getId());
 
-            // Gửi tin nhắn real-time đến người nhận
-            String recipientDestination = "/queue/messages";
-            log.info("Sending to recipient {}: {}", messageRequest.getRecipientId(), recipientDestination);
-            
+            // ⭐ QUAN TRỌNG: Phải gửi đến đúng destination
+            String recipientDestination = "/queue/messages"; // ⭐ Đúng format
+
+            // ⭐ Gửi tin nhắn đến người nhận
+            log.info("📤 Sending to recipient user ID {}", messageRequest.getRecipientId());
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(messageRequest.getRecipientId()),
                     recipientDestination,
-                    messageResponse
-            );
+                    messageResponse);
+
+            // ⭐ Gửi confirmation về cho người gửi (để hiển thị message ngay lập tức)
+            log.info("📤 Sending to sender user ID {}", senderId);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(senderId),
+                    recipientDestination,
+                    messageResponse);
+            log.info("✅ Message sent successfully to both users");
+            log.info("===========================================");
 
             // Gửi confirmation về cho người gửi
             log.info("Sending confirmation to sender {}", senderId);
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(senderId),
                     recipientDestination,
-                    messageResponse
-            );
+                    messageResponse);
 
             log.info("✅ WebSocket: Message sent successfully to both users");
             log.info("===========================================\n");
