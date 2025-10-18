@@ -4,6 +4,8 @@ package com.example.backend.dto.response;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * Response DTO cho Message
  */
@@ -20,5 +22,9 @@ public class MessageResponse {
     private String senderAvatarUrl;
     private String content;
     private String messageType;
+   
+
+     // ⭐ QUAN TRỌNG: Format createdAt thành ISO string
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 }

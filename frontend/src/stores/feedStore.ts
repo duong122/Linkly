@@ -14,6 +14,7 @@ interface Post {
   isSaved: boolean;
 }
 
+
 interface ApiPost {
   id: number;
   userId: number;
@@ -36,8 +37,23 @@ interface FeedState {
   currentPage: number;
   totalPages: number;
   hasMore: boolean;
+  currentUser: CurrentUser | null;
   fetchFeed: () => Promise<void>;
   loadMore: () => Promise<void>;
+
+   // ⭐ THÊM: Methods mới
+  loadPosts: (page?: number, size?: number) => Promise<void>;
+  loadCurrentUser: () => Promise<void>;
+  createPost: (image: File, caption: string) => Promise<void>;
+}
+
+
+interface CurrentUser {
+  id: number;
+  username: string;
+  fullName: string;
+  avatarUrl: string;
+  email: string;
 }
 
 // Định nghĩa URL API
@@ -75,6 +91,20 @@ const transformApiPost = (apiPost: ApiPost): Post => ({
   isSaved: false,
 });
 
+// ⭐ THÊM: Helper function cho multipart/form-data
+const getAuthHeadersMultipart = () => {
+  const token = localStorage.getItem('authToken');
+  
+  if (!token) {
+    console.error('❌ No authentication token found in localStorage');
+  }
+  
+  return {
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    // ❌ KHÔNG set Content-Type cho multipart, browser tự động set
+  };
+};
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken');
   
@@ -89,7 +119,6 @@ const getAuthHeaders = () => {
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
 };
-
 export const useFeedStore = create<FeedState>((set, get) => ({
   posts: [],
   loading: false,
@@ -97,6 +126,9 @@ export const useFeedStore = create<FeedState>((set, get) => ({
   currentPage: 0,
   totalPages: 0,
   hasMore: true,
+  
+  // ⭐ THÊM: CurrentUser state
+  currentUser: null,
 
   fetchFeed: async () => {
     const { loading } = get();
@@ -120,7 +152,6 @@ export const useFeedStore = create<FeedState>((set, get) => ({
         const errorText = await response.text();
         console.error('❌ Error response:', errorText);
         
-        // Nếu lỗi 401 hoặc 403 - có thể do token hết hạn hoặc không hợp lệ
         if (response.status === 401 || response.status === 403) {
           throw new Error('Authentication required. Please login again.');
         }
@@ -162,7 +193,7 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     try {
       const nextPage = currentPage + 1;
       const response = await fetch(
-        `http://localhost:8080/api/posts/feed?page=${nextPage}&size=10`,
+        `${API_BASE_URL}/api/posts/feed?page=${nextPage}&size=10`,
         {
           method: 'GET',
           headers: getAuthHeaders(),
@@ -200,6 +231,151 @@ export const useFeedStore = create<FeedState>((set, get) => ({
         error: error instanceof Error ? error.message : 'An error occurred',
         loading: false,
       });
+    }
+  },
+
+  // ⭐ THÊM: loadPosts method (giống fetchFeed nhưng có thể custom page/size)
+  loadPosts: async (page = 0, size = 10) => {
+    const { loading } = get();
+    if (loading) return;
+
+    set({ loading: true, error: null });
+
+    try {
+      const headers = getAuthHeaders();
+      
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/feed?page=${page}&size=${size}`,
+        {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        }
+      );
+      
+      console.log('📥 loadPosts response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ loadPosts error:', errorText);
+        
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication required. Please login again.');
+        }
+        
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ loadPosts result:', result);
+      
+      if (result.success && result.data) {
+        const transformedPosts = result.data.content.map(transformApiPost);
+        
+        set({
+          posts: transformedPosts,
+          currentPage: result.data.pageNumber,
+          totalPages: result.data.totalPages,
+          hasMore: !result.data.last,
+          loading: false,
+        });
+      } else {
+        throw new Error(result.message || 'Failed to load posts');
+      }
+    } catch (error) {
+      console.error('Error in loadPosts:', error);
+      set({
+        error: error instanceof Error ? error.message : 'An error occurred',
+        loading: false,
+      });
+    }
+  },
+
+  // ⭐ THÊM: loadCurrentUser method
+  loadCurrentUser: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.warn('⚠️ No token found, skipping loadCurrentUser');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.error('❌ Failed to load current user');
+        return;
+      }
+
+      const result = await response.json();
+      console.log('✅ Current user loaded:', result);
+
+      if (result.success && result.data) {
+        set({
+          currentUser: {
+            id: result.data.id,
+            username: result.data.username,
+            fullName: result.data.fullName,
+            avatarUrl: result.data.avatarUrl,
+            email: result.data.email,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error loading current user:', error);
+    }
+  },
+
+  // ⭐ THÊM: createPost method
+  createPost: async (image: File, caption: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Tạo FormData
+      const formData = new FormData();
+      formData.append('image', image);
+      formData.append('caption', caption);
+
+      console.log('📤 Creating post...');
+      console.log('📦 Image:', image.name, image.type, image.size);
+      console.log('📝 Caption:', caption);
+
+      const response = await fetch(`${API_BASE_URL}/api/posts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // ❌ KHÔNG set Content-Type, browser tự động set cho multipart
+        },
+        body: formData,
+        credentials: 'include',
+      });
+
+      console.log('📥 Create post response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Create post error:', errorText);
+        throw new Error(`Failed to create post: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Post created successfully:', result);
+
+      // Reload posts sau khi tạo thành công
+      await get().loadPosts(0, 10);
+
+      return result;
+    } catch (error) {
+      console.error('Error creating post:', error);
+      throw error;
     }
   },
 }));

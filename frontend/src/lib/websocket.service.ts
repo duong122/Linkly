@@ -13,8 +13,20 @@ class WebSocketService {
   private connectCallbacks: (() => void)[] = [];
   private disconnectCallbacks: (() => void)[] = [];
   private errorCallbacks: ((error: string) => void)[] = [];
+   private isConnecting: boolean = false;
 
   async connect(token: string): Promise<void> {
+    // ⭐ Nếu đã connected hoặc đang connecting, không kết nối lại
+    if (this.stompClient?.connected) {
+      console.log('⚠️ Already connected, skipping');
+      return Promise.resolve();
+    }
+
+    if (this.isConnecting) {
+      console.log('⚠️ Already connecting, skipping');
+      return Promise.resolve();
+    }
+
     this.token = token;
 
     return new Promise((resolve, reject) => {
